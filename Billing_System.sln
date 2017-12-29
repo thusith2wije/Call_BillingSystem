@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27130.2010
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Billing_System", "Billing_System\Billing_System.csproj", "{11F89346-267C-4B04-8294-727CF3C7467B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Billing_System.Tests", "Billing_System.Tests\Billing_System.Tests.csproj", "{C2C17B4E-6592-40CB-B0B9-37FC95AD22EA}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{11F89346-267C-4B04-8294-727CF3C7467B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{11F89346-267C-4B04-8294-727CF3C7467B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{11F89346-267C-4B04-8294-727CF3C7467B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{11F89346-267C-4B04-8294-727CF3C7467B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C2C17B4E-6592-40CB-B0B9-37FC95AD22EA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C2C17B4E-6592-40CB-B0B9-37FC95AD22EA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C2C17B4E-6592-40CB-B0B9-37FC95AD22EA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C2C17B4E-6592-40CB-B0B9-37FC95AD22EA}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {FA06F70C-E0D3-4981-9445-4ED24B748587}
+	EndGlobalSection
+EndGlobal

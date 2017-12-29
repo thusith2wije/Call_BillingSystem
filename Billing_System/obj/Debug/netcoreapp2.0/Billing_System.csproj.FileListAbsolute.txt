@@ -1,0 +1,14 @@
+c:\users\tij\source\repos\Billing_System\Billing_System\bin\Debug\netcoreapp2.0\Billing_System.deps.json
+c:\users\tij\source\repos\Billing_System\Billing_System\bin\Debug\netcoreapp2.0\Billing_System.runtimeconfig.json
+c:\users\tij\source\repos\Billing_System\Billing_System\bin\Debug\netcoreapp2.0\Billing_System.runtimeconfig.dev.json
+c:\users\tij\source\repos\Billing_System\Billing_System\bin\Debug\netcoreapp2.0\Billing_System.dll
+c:\users\tij\source\repos\Billing_System\Billing_System\obj\Debug\netcoreapp2.0\Billing_System.csprojResolveAssemblyReference.cache
+c:\users\tij\source\repos\Billing_System\Billing_System\obj\Debug\netcoreapp2.0\Billing_System.csproj.CoreCompileInputs.cache
+c:\users\tij\source\repos\Billing_System\Billing_System\obj\Debug\netcoreapp2.0\Billing_System.AssemblyInfoInputs.cache
+c:\users\tij\source\repos\Billing_System\Billing_System\obj\Debug\netcoreapp2.0\Billing_System.AssemblyInfo.cs
+c:\users\tij\source\repos\Billing_System\Billing_System\bin\Debug\netcoreapp2.0\NUnit3.TestAdapter.dll
+c:\users\tij\source\repos\Billing_System\Billing_System\bin\Debug\netcoreapp2.0\nunit.engine.netstandard.dll
+c:\users\tij\source\repos\Billing_System\Billing_System\bin\Debug\netcoreapp2.0\Mono.Cecil.dll
+c:\users\tij\source\repos\Billing_System\Billing_System\bin\Debug\netcoreapp2.0\Billing_System.pdb
+c:\users\tij\source\repos\Billing_System\Billing_System\obj\Debug\netcoreapp2.0\Billing_System.dll
+c:\users\tij\source\repos\Billing_System\Billing_System\obj\Debug\netcoreapp2.0\Billing_System.pdb
