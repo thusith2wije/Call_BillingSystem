@@ -6,9 +6,16 @@ namespace Billing_System
     {
         static void Main(string[] args)
         {
+            for(int i = 0;i<999;i++)
+            {
+
+                Console.WriteLine("Enter Customer Number: XXX-XXXXXXX"); // Prompt
+                string input_val = Console.ReadLine(); // Get string from user
+                Console.WriteLine("-----------------------");
+                BillingEngine bil = new BillingEngine();
+                bil.Genarate(input_val);
+            }
             
-            BillingEngine bil = new BillingEngine();            
-            bil.Genarate("011-7489261");
 
 
             Console.WriteLine();

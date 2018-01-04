@@ -13,6 +13,7 @@ namespace Billing_System
         public string C_CallAddress { get; set; }
         public string C_FullName { get; set; }
         public string C_PackageCode { get; set; }
-        
+        public string C_CustomerReg_Date { get; set; }
+
     }
 }
