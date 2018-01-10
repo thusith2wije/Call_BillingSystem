@@ -15,12 +15,12 @@ namespace Billing_System
         List<CalculatedBill> print_Bill = new List<CalculatedBill>();
         string path_customer = @"C:\Users\tij\source\repos\Billing_System\CustomerList.txt";
         string path_call = @"C:\Users\tij\source\repos\Billing_System\CallList.txt";
-        //private TimeSpan workdayStartTime;
-        private TimeSpan workdayStopTime;
+        
+        
         TimeSpan startPeakTime = new TimeSpan(8, 0, 0);
         TimeSpan stopPeakTime = new TimeSpan(20, 0, 0);
         TimeSpan startDayTime = new TimeSpan(0, 0, 0);
-        TimeSpan stoptDayTime = new TimeSpan(23, 59, 0);
+        TimeSpan stoptDayTime = new TimeSpan(23, 59, 59);
 
 
         /*Scan the CSV file of customer details*/
@@ -150,7 +150,7 @@ namespace Billing_System
                 }
                 else
                 {
-                    Console.WriteLine("Obj Not found");
+                    //Console.WriteLine("Obj Not found");
                 }
             }           
            
@@ -176,7 +176,7 @@ namespace Billing_System
             foreach (CallOfCustomer s in customer_callLines)
             {//
 
-                ExitLable:
+                ExitLable: 
                 CalculatedBill obj = new CalculatedBill();
                 string[] call_header_dialed = s.C_CallPNumber.Split('-').Select(sValue => sValue.Trim()).ToArray();
                 string header = call_header_dialed[0];
@@ -190,37 +190,42 @@ namespace Billing_System
                 
                 if(obj.Package_Code == "A")
                 {
+                    int temp_rent = 100;
+                    TimeSpan startPeakTimePackA = new TimeSpan(10, 0, 0);
+                    TimeSpan stopPeakTimePackA = new TimeSpan(18, 0, 0);
                     /* For Local Area Calls*/
                     if (header == call_header_receved[0])
                     {
                         /*In Peak Time*/
-                        if (s.C_CallStartTime.Hour > startPeakTime.Hours && s.C_CallStartTime.Hour < stopPeakTime.Hours /*&& s.C_CallStartTime.AddMinutes(s.C_CallDuration / 60).Hour < stopPeakTime.Hours*/)
+                        if (s.C_CallStartTime.Hour > startPeakTimePackA.Hours && s.C_CallStartTime.Hour < stopPeakTimePackA.Hours /*&& s.C_CallStartTime.AddMinutes(s.C_CallDuration / 60).Hour < stopPeakTime.Hours*/)
                         {
                             int PackA_Peak_Local_CallCarge = 3;
-                            if ((s.C_CallStartTime.Hour + s.C_CallDuration / 3600) <= stopPeakTime.Hours)
+                            if ((s.C_CallStartTime.Hour + s.C_CallDuration / 3600) <= stopPeakTimePackA.Hours)
                             {
                                 obj.CallNo = i;
                                 obj.CallStartTime = s.C_CallStartTime;
                                 obj.CallDuration = s.C_CallDuration;
                                 obj.Destination = s.C_EndPNumber;
                                 obj.Each_CallCarge = PackA_Peak_Local_CallCarge * s.C_CallDuration / 60;
+                                obj.Rental = temp_rent;
 
                                 print_Bill.Add(obj);
                             }
-                            else if ((s.C_CallStartTime.Hour + s.C_CallDuration / 3600) > stopPeakTime.Hours)
+                            else if ((s.C_CallStartTime.Hour + s.C_CallDuration / 3600) > stopPeakTimePackA.Hours)
                             {
                                 obj.CallNo = i;
                                 obj.CallStartTime = s.C_CallStartTime;
                                 int a = s.C_CallDuration;
-                                s.C_CallDuration = (stopPeakTime.Hours - s.C_CallStartTime.Hour) * 3600;
+                                s.C_CallDuration = (stopPeakTimePackA.Hours - s.C_CallStartTime.Hour) * 3600;
                                 obj.CallDuration = s.C_CallDuration;
                                 obj.Destination = s.C_EndPNumber;
                                 obj.Each_CallCarge = PackA_Peak_Local_CallCarge * s.C_CallDuration / 60;
+                                obj.Rental = temp_rent;
 
                                 print_Bill.Add(obj);
 
                                 s.C_CallDuration = a - s.C_CallDuration;
-                                s.C_CallStartTime = Convert.ToDateTime(stopPeakTime.ToString());
+                                s.C_CallStartTime = Convert.ToDateTime(stopPeakTimePackA.ToString());
 
                                 //continue;//break;
                                 goto ExitLable;
@@ -228,11 +233,11 @@ namespace Billing_System
 
                         }
                         /*In Off Peak Time and before to 24*/
-                        else if ((s.C_CallStartTime.Hour < stoptDayTime.Hours && s.C_CallStartTime.Hour >= stopPeakTime.Hours))
+                        else if ((s.C_CallStartTime.Hour < stoptDayTime.Hours && s.C_CallStartTime.Hour >= stopPeakTimePackA.Hours))
                         {
                             //Console.WriteLine("Call: " + i);
                             int PackA_OffPeak_Local_CallCarge = 2;
-
+                            
                             if ((s.C_CallStartTime.Hour + s.C_CallDuration / 3600) <= 24)
                             {
                                 obj.CallNo = i;
@@ -240,6 +245,7 @@ namespace Billing_System
                                 obj.CallDuration = s.C_CallDuration;
                                 obj.Destination = s.C_EndPNumber;
                                 obj.Each_CallCarge = PackA_OffPeak_Local_CallCarge * s.C_CallDuration / 60;
+                                obj.Rental = temp_rent;
 
                                 print_Bill.Add(obj);
                             }
@@ -252,6 +258,7 @@ namespace Billing_System
                                 obj.CallDuration = s.C_CallDuration;
                                 obj.Destination = s.C_EndPNumber;
                                 obj.Each_CallCarge = PackA_OffPeak_Local_CallCarge * s.C_CallDuration / 60;
+                                obj.Rental = temp_rent;
 
                                 print_Bill.Add(obj);
 
@@ -264,35 +271,37 @@ namespace Billing_System
 
                         }
                         /*In Off Peak Time and After to 24*/
-                        else if ((s.C_CallStartTime.Hour >= startDayTime.Hours && s.C_CallStartTime.Hour < startPeakTime.Hours))
+                        else if ((s.C_CallStartTime.Hour >= startDayTime.Hours && s.C_CallStartTime.Hour < startPeakTimePackA.Hours))
                         {
                             //Console.WriteLine("Call: " + i);
                             int PackA_OffPeak_Local_CallCarge = 2;
 
-                            if ((s.C_CallStartTime.Hour + s.C_CallDuration / 3600) <= startPeakTime.Hours)
+                            if ((s.C_CallStartTime.Hour + s.C_CallDuration / 3600) <= startPeakTimePackA.Hours)
                             {
                                 obj.CallNo = i;
                                 obj.CallStartTime = s.C_CallStartTime;
                                 obj.CallDuration = s.C_CallDuration;
                                 obj.Destination = s.C_EndPNumber;
                                 obj.Each_CallCarge = PackA_OffPeak_Local_CallCarge * s.C_CallDuration / 60;
+                                obj.Rental = temp_rent;
 
                                 print_Bill.Add(obj);
                             }
-                            else if ((s.C_CallStartTime.Hour + s.C_CallDuration / 3600) > startPeakTime.Hours)
+                            else if ((s.C_CallStartTime.Hour + s.C_CallDuration / 3600) > startPeakTimePackA.Hours)
                             {
                                 obj.CallNo = i;
                                 obj.CallStartTime = s.C_CallStartTime;
                                 int a = s.C_CallDuration;
-                                s.C_CallDuration = (startPeakTime.Hours - s.C_CallStartTime.Hour) * 3600;
+                                s.C_CallDuration = (startPeakTimePackA.Hours - s.C_CallStartTime.Hour) * 3600;
                                 obj.CallDuration = s.C_CallDuration;
                                 obj.Destination = s.C_EndPNumber;
                                 obj.Each_CallCarge = PackA_OffPeak_Local_CallCarge * s.C_CallDuration / 60;
+                                obj.Rental = temp_rent;
 
                                 print_Bill.Add(obj);
 
                                 s.C_CallDuration = a - s.C_CallDuration;
-                                s.C_CallStartTime = Convert.ToDateTime(startPeakTime.ToString());
+                                s.C_CallStartTime = Convert.ToDateTime(startPeakTimePackA.ToString());
 
                                 //continue;//break;
                                 goto ExitLable;
@@ -316,6 +325,7 @@ namespace Billing_System
                                 obj.CallDuration = s.C_CallDuration;
                                 obj.Destination = s.C_EndPNumber;
                                 obj.Each_CallCarge = PackB_Peak_Long_CallCarge * s.C_CallDuration / 60;
+                                obj.Rental = temp_rent;
 
                                 print_Bill.Add(obj);
                             }
@@ -328,6 +338,7 @@ namespace Billing_System
                                 obj.CallDuration = s.C_CallDuration;
                                 obj.Destination = s.C_EndPNumber;
                                 obj.Each_CallCarge = PackB_Peak_Long_CallCarge * s.C_CallDuration / 60;
+                                obj.Rental = temp_rent;
 
                                 print_Bill.Add(obj);
 
@@ -352,6 +363,7 @@ namespace Billing_System
                                 obj.CallDuration = s.C_CallDuration;
                                 obj.Destination = s.C_EndPNumber;
                                 obj.Each_CallCarge = PackB_OffPeak_Long_CallCarge * s.C_CallDuration / 60;
+                                obj.Rental = temp_rent;
 
                                 print_Bill.Add(obj);
                             }
@@ -364,6 +376,7 @@ namespace Billing_System
                                 obj.CallDuration = s.C_CallDuration;
                                 obj.Destination = s.C_EndPNumber;
                                 obj.Each_CallCarge = PackB_OffPeak_Long_CallCarge * s.C_CallDuration / 60;
+                                obj.Rental = temp_rent;
 
                                 print_Bill.Add(obj);
 
@@ -388,6 +401,7 @@ namespace Billing_System
                                 obj.CallDuration = s.C_CallDuration;
                                 obj.Destination = s.C_EndPNumber;
                                 obj.Each_CallCarge = PackB_OffPeak_Long_CallCarge * s.C_CallDuration / 60;
+                                obj.Rental = temp_rent;
 
                                 print_Bill.Add(obj);
                             }
@@ -400,6 +414,7 @@ namespace Billing_System
                                 obj.CallDuration = s.C_CallDuration;
                                 obj.Destination = s.C_EndPNumber;
                                 obj.Each_CallCarge = PackB_OffPeak_Long_CallCarge * s.C_CallDuration / 60;
+                                obj.Rental = temp_rent;
 
                                 print_Bill.Add(obj);
 
@@ -418,6 +433,7 @@ namespace Billing_System
                 
                 else if(obj.Package_Code == "B")
                 {
+                    int temp_rent = 100;
                     /* For Local Area Calls*/
                     if (header == call_header_receved[0])
                     {
@@ -432,6 +448,7 @@ namespace Billing_System
                                 obj.CallDuration = s.C_CallDuration;
                                 obj.Destination = s.C_EndPNumber;
                                 obj.Each_CallCarge = PackB_Peak_Local_CallCarge * s.C_CallDuration / 60;
+                                obj.Rental = temp_rent;
 
                                 print_Bill.Add(obj);
                             }
@@ -444,6 +461,7 @@ namespace Billing_System
                                 obj.CallDuration = s.C_CallDuration;
                                 obj.Destination = s.C_EndPNumber;
                                 obj.Each_CallCarge = PackB_Peak_Local_CallCarge * s.C_CallDuration / 60;
+                                obj.Rental = temp_rent;
 
                                 print_Bill.Add(obj);
 
@@ -465,9 +483,10 @@ namespace Billing_System
                             {
                                 obj.CallNo = i;
                                 obj.CallStartTime = s.C_CallStartTime;
-                                obj.CallDuration = s.C_CallDuration;
+                                obj.CallDuration = s.C_CallDuration - 60;//1st minuit free                                
                                 obj.Destination = s.C_EndPNumber;
-                                obj.Each_CallCarge = PackB_OffPeak_Local_CallCarge * s.C_CallDuration / 60;
+                                obj.Each_CallCarge = PackB_OffPeak_Local_CallCarge * obj.CallDuration / 60;
+                                obj.Rental = temp_rent;
 
                                 print_Bill.Add(obj);
                             }
@@ -477,9 +496,10 @@ namespace Billing_System
                                 obj.CallStartTime = s.C_CallStartTime;
                                 int a = s.C_CallDuration;
                                 s.C_CallDuration = (24 - s.C_CallStartTime.Hour) * 3600;
-                                obj.CallDuration = s.C_CallDuration;
+                                obj.CallDuration = s.C_CallDuration - 60;//1st minuit free
                                 obj.Destination = s.C_EndPNumber;
-                                obj.Each_CallCarge = PackB_OffPeak_Local_CallCarge * s.C_CallDuration / 60;
+                                obj.Each_CallCarge = PackB_OffPeak_Local_CallCarge * obj.CallDuration / 60;
+                                obj.Rental = temp_rent;
 
                                 print_Bill.Add(obj);
 
@@ -501,9 +521,10 @@ namespace Billing_System
                             {
                                 obj.CallNo = i;
                                 obj.CallStartTime = s.C_CallStartTime;
-                                obj.CallDuration = s.C_CallDuration;
+                                obj.CallDuration = s.C_CallDuration - 60;//1st minuit free
                                 obj.Destination = s.C_EndPNumber;
                                 obj.Each_CallCarge = PackB_OffPeak_Local_CallCarge * s.C_CallDuration / 60;
+                                obj.Rental = temp_rent;
 
                                 print_Bill.Add(obj);
                             }
@@ -513,9 +534,10 @@ namespace Billing_System
                                 obj.CallStartTime = s.C_CallStartTime;
                                 int a = s.C_CallDuration;
                                 s.C_CallDuration = (startPeakTime.Hours - s.C_CallStartTime.Hour) * 3600;
-                                obj.CallDuration = s.C_CallDuration;
+                                obj.CallDuration = s.C_CallDuration - 60;//1st minuit free
                                 obj.Destination = s.C_EndPNumber;
-                                obj.Each_CallCarge = PackB_OffPeak_Local_CallCarge * s.C_CallDuration / 60;
+                                obj.Each_CallCarge = PackB_OffPeak_Local_CallCarge * obj.CallDuration / 60;
+                                obj.Rental = temp_rent;
 
                                 print_Bill.Add(obj);
 
@@ -544,6 +566,7 @@ namespace Billing_System
                                 obj.CallDuration = s.C_CallDuration;
                                 obj.Destination = s.C_EndPNumber;
                                 obj.Each_CallCarge = PackB_Peak_Long_CallCarge * s.C_CallDuration / 60;
+                                obj.Rental = temp_rent;
 
                                 print_Bill.Add(obj);
                             }
@@ -556,6 +579,7 @@ namespace Billing_System
                                 obj.CallDuration = s.C_CallDuration;
                                 obj.Destination = s.C_EndPNumber;
                                 obj.Each_CallCarge = PackB_Peak_Long_CallCarge * s.C_CallDuration / 60;
+                                obj.Rental = temp_rent;
 
                                 print_Bill.Add(obj);
 
@@ -580,6 +604,7 @@ namespace Billing_System
                                 obj.CallDuration = s.C_CallDuration;
                                 obj.Destination = s.C_EndPNumber;
                                 obj.Each_CallCarge = PackB_OffPeak_Long_CallCarge * s.C_CallDuration / 60;
+                                obj.Rental = temp_rent;
 
                                 print_Bill.Add(obj);
                             }
@@ -592,6 +617,7 @@ namespace Billing_System
                                 obj.CallDuration = s.C_CallDuration;
                                 obj.Destination = s.C_EndPNumber;
                                 obj.Each_CallCarge = PackB_OffPeak_Long_CallCarge * s.C_CallDuration / 60;
+                                obj.Rental = temp_rent;
 
                                 print_Bill.Add(obj);
 
@@ -616,6 +642,7 @@ namespace Billing_System
                                 obj.CallDuration = s.C_CallDuration;
                                 obj.Destination = s.C_EndPNumber;
                                 obj.Each_CallCarge = PackB_OffPeak_Long_CallCarge * s.C_CallDuration / 60;
+                                obj.Rental = temp_rent;
 
                                 print_Bill.Add(obj);
                             }
@@ -628,6 +655,7 @@ namespace Billing_System
                                 obj.CallDuration = s.C_CallDuration;
                                 obj.Destination = s.C_EndPNumber;
                                 obj.Each_CallCarge = PackB_OffPeak_Long_CallCarge * s.C_CallDuration / 60;
+                                obj.Rental = temp_rent;
 
                                 print_Bill.Add(obj);
 
@@ -643,6 +671,488 @@ namespace Billing_System
                     }
 
                 }
+                else if (obj.Package_Code == "C")
+                {
+                    int temp_rent = 300;
+                    TimeSpan startPeakTimePackC = new TimeSpan(9, 0, 0);
+                    TimeSpan stopPeakTimePackC = new TimeSpan(18, 0, 0);
+                    /* For Local Area Calls*/
+                    if (header == call_header_receved[0])
+                    {
+                        /*In Peak Time*/
+                        if (s.C_CallStartTime.Hour > startPeakTimePackC.Hours && s.C_CallStartTime.Hour < stopPeakTimePackC.Hours /*&& s.C_CallStartTime.AddMinutes(s.C_CallDuration / 60).Hour < stopPeakTime.Hours*/)
+                        {
+                            int PackC_Peak_Local_CallCarge = 2;
+                            if ((s.C_CallStartTime.Hour + s.C_CallDuration / 3600) <= stopPeakTimePackC.Hours)
+                            {
+                                obj.CallNo = i;
+                                obj.CallStartTime = s.C_CallStartTime;
+                                obj.CallDuration = s.C_CallDuration-60;
+                                obj.Destination = s.C_EndPNumber;
+                                obj.Each_CallCarge = PackC_Peak_Local_CallCarge * obj.CallDuration / 60;
+                                obj.Rental = temp_rent;
+
+                                print_Bill.Add(obj);
+                            }
+                            else if ((s.C_CallStartTime.Hour + s.C_CallDuration / 3600) > stopPeakTimePackC.Hours)
+                            {
+                                obj.CallNo = i;
+                                obj.CallStartTime = s.C_CallStartTime;
+                                int a = s.C_CallDuration;
+                                s.C_CallDuration = (stopPeakTimePackC.Hours - s.C_CallStartTime.Hour) * 3600;
+                                obj.CallDuration = s.C_CallDuration-60;
+                                obj.Destination = s.C_EndPNumber;
+                                obj.Each_CallCarge = PackC_Peak_Local_CallCarge * obj.CallDuration / 60;
+                                obj.Rental = temp_rent;
+
+                                print_Bill.Add(obj);
+
+                                s.C_CallDuration = a - s.C_CallDuration;
+                                s.C_CallStartTime = Convert.ToDateTime(stopPeakTimePackC.ToString());
+
+                                //continue;//break;
+                                goto ExitLable;
+                            }
+
+                        }
+                        /*In Off Peak Time and before to 24*/
+                        else if ((s.C_CallStartTime.Hour < stoptDayTime.Hours && s.C_CallStartTime.Hour >= stopPeakTimePackC.Hours))
+                        {
+                            //Console.WriteLine("Call: " + i);
+                            int PackC_OffPeak_Local_CallCarge = 1;
+
+                            if ((s.C_CallStartTime.Hour + s.C_CallDuration / 3600) <= 24)
+                            {
+                                obj.CallNo = i;
+                                obj.CallStartTime = s.C_CallStartTime;
+                                obj.CallDuration = s.C_CallDuration-60;
+                                obj.Destination = s.C_EndPNumber;
+                                obj.Each_CallCarge = PackC_OffPeak_Local_CallCarge * obj.CallDuration / 60;
+                                obj.Rental = temp_rent;
+
+                                print_Bill.Add(obj);
+                            }
+                            else if ((s.C_CallStartTime.Hour + s.C_CallDuration / 3600) > 24)
+                            {
+                                obj.CallNo = i;
+                                obj.CallStartTime = s.C_CallStartTime;
+                                int a = s.C_CallDuration;
+                                s.C_CallDuration = (24 - s.C_CallStartTime.Hour) * 3600;
+                                obj.CallDuration = s.C_CallDuration-60;
+                                obj.Destination = s.C_EndPNumber;
+                                obj.Each_CallCarge = PackC_OffPeak_Local_CallCarge * obj.CallDuration / 60;
+                                obj.Rental = temp_rent;
+
+                                print_Bill.Add(obj);
+
+                                s.C_CallDuration = a - s.C_CallDuration;
+                                s.C_CallStartTime = Convert.ToDateTime(startDayTime.ToString());
+
+                                //continue;//break;
+                                goto ExitLable;
+                            }
+
+                        }
+                        /*In Off Peak Time and After to 24*/
+                        else if ((s.C_CallStartTime.Hour >= startDayTime.Hours && s.C_CallStartTime.Hour < startPeakTimePackC.Hours))
+                        {
+                            //Console.WriteLine("Call: " + i);
+                            int PackC_OffPeak_Local_CallCarge = 1;
+
+                            if ((s.C_CallStartTime.Hour + s.C_CallDuration / 3600) <= startPeakTimePackC.Hours)
+                            {
+                                obj.CallNo = i;
+                                obj.CallStartTime = s.C_CallStartTime;
+                                obj.CallDuration = s.C_CallDuration-60;
+                                obj.Destination = s.C_EndPNumber;
+                                obj.Each_CallCarge = PackC_OffPeak_Local_CallCarge * obj.CallDuration / 60;
+                                obj.Rental = temp_rent;
+
+                                print_Bill.Add(obj);
+                            }
+                            else if ((s.C_CallStartTime.Hour + s.C_CallDuration / 3600) > startPeakTimePackC.Hours)
+                            {
+                                obj.CallNo = i;
+                                obj.CallStartTime = s.C_CallStartTime;
+                                int a = s.C_CallDuration;
+                                s.C_CallDuration = (startPeakTimePackC.Hours - s.C_CallStartTime.Hour) * 3600;
+                                obj.CallDuration = s.C_CallDuration-60;
+                                obj.Destination = s.C_EndPNumber;
+                                obj.Each_CallCarge = PackC_OffPeak_Local_CallCarge * obj.CallDuration / 60;
+                                obj.Rental = temp_rent;
+
+                                print_Bill.Add(obj);
+
+                                s.C_CallDuration = a - s.C_CallDuration;
+                                s.C_CallStartTime = Convert.ToDateTime(startPeakTimePackC.ToString());
+
+                                //continue;//break;
+                                goto ExitLable;
+                            }
+
+                        }
+
+                    }
+                    /* For Long Area Calls*/
+                    else if (header != call_header_receved[0])
+                    {
+
+                        /*Start In Peak Time*/
+                        if (s.C_CallStartTime.Hour > startPeakTime.Hours && s.C_CallStartTime.Hour < stopPeakTime.Hours /*&& s.C_CallStartTime.AddMinutes(s.C_CallDuration / 60).Hour < stopPeakTime.Hours*/)
+                        {
+                            int PackC_Peak_Long_CallCarge = 3;
+                            if ((s.C_CallStartTime.Hour + s.C_CallDuration / 3600) <= stopPeakTime.Hours)
+                            {
+                                obj.CallNo = i;
+                                obj.CallStartTime = s.C_CallStartTime;
+                                obj.CallDuration = s.C_CallDuration;
+                                obj.Destination = s.C_EndPNumber;
+                                obj.Each_CallCarge = PackC_Peak_Long_CallCarge * s.C_CallDuration / 60;
+                                obj.Rental = temp_rent;
+
+                                print_Bill.Add(obj);
+                            }
+                            else if ((s.C_CallStartTime.Hour + s.C_CallDuration / 3600) > stopPeakTime.Hours)
+                            {
+                                obj.CallNo = i;
+                                obj.CallStartTime = s.C_CallStartTime;
+                                int a = s.C_CallDuration;
+                                s.C_CallDuration = (stopPeakTime.Hours - s.C_CallStartTime.Hour) * 3600;
+                                obj.CallDuration = s.C_CallDuration;
+                                obj.Destination = s.C_EndPNumber;
+                                obj.Each_CallCarge = PackC_Peak_Long_CallCarge * s.C_CallDuration / 60;
+                                obj.Rental = temp_rent;
+
+                                print_Bill.Add(obj);
+
+                                s.C_CallDuration = a - s.C_CallDuration;
+                                s.C_CallStartTime = Convert.ToDateTime(stopPeakTime.ToString());
+
+                                //continue;//break;
+                                goto ExitLable;
+                            }
+
+                        }
+                        /*In Off Peak Time and before to 24*/
+                        else if ((s.C_CallStartTime.Hour < stoptDayTime.Hours && s.C_CallStartTime.Minute < stoptDayTime.Minutes && s.C_CallStartTime.Hour >= stopPeakTime.Hours))
+                        {
+                            //Console.WriteLine("Call: " + i);
+                            int PackC_OffPeak_Long_CallCarge = 2;
+
+                            if ((s.C_CallStartTime.Hour + s.C_CallDuration / 3600) <= 24)
+                            {
+                                obj.CallNo = i;
+                                obj.CallStartTime = s.C_CallStartTime;
+                                obj.CallDuration = s.C_CallDuration;
+                                obj.Destination = s.C_EndPNumber;
+                                obj.Each_CallCarge = PackC_OffPeak_Long_CallCarge * s.C_CallDuration / 60;
+                                obj.Rental = temp_rent;
+
+                                print_Bill.Add(obj);
+                            }
+                            else if ((s.C_CallStartTime.Hour + s.C_CallDuration / 3600) > 24)
+                            {
+                                obj.CallNo = i;
+                                obj.CallStartTime = s.C_CallStartTime;
+                                int a = s.C_CallDuration;
+                                s.C_CallDuration = (24 - s.C_CallStartTime.Hour) * 3600;
+                                obj.CallDuration = s.C_CallDuration;
+                                obj.Destination = s.C_EndPNumber;
+                                obj.Each_CallCarge = PackC_OffPeak_Long_CallCarge * s.C_CallDuration / 60;
+                                obj.Rental = temp_rent;
+
+                                print_Bill.Add(obj);
+
+                                s.C_CallDuration = a - s.C_CallDuration;
+                                s.C_CallStartTime = Convert.ToDateTime(startDayTime.ToString());
+
+                                //continue;//break;
+                                goto ExitLable;
+                            }
+
+                        }
+                        /*In Off Peak Time and After to 24*/
+                        else if ((s.C_CallStartTime.Hour >= startDayTime.Hours && s.C_CallStartTime.Hour < startPeakTime.Hours))
+                        {
+                            //Console.WriteLine("Call: " + i);
+                            int PackC_OffPeak_Long_CallCarge = 2;
+
+                            if ((s.C_CallStartTime.Hour + s.C_CallDuration / 3600) <= startPeakTime.Hours)
+                            {
+                                obj.CallNo = i;
+                                obj.CallStartTime = s.C_CallStartTime;
+                                obj.CallDuration = s.C_CallDuration;
+                                obj.Destination = s.C_EndPNumber;
+                                obj.Each_CallCarge = PackC_OffPeak_Long_CallCarge * s.C_CallDuration / 60;
+                                obj.Rental = temp_rent;
+
+                                print_Bill.Add(obj);
+                            }
+                            else if ((s.C_CallStartTime.Hour + s.C_CallDuration / 3600) > startPeakTime.Hours)
+                            {
+                                obj.CallNo = i;
+                                obj.CallStartTime = s.C_CallStartTime;
+                                int a = s.C_CallDuration;
+                                s.C_CallDuration = (startPeakTime.Hours - s.C_CallStartTime.Hour) * 3600;
+                                obj.CallDuration = s.C_CallDuration;
+                                obj.Destination = s.C_EndPNumber;
+                                obj.Each_CallCarge = PackC_OffPeak_Long_CallCarge * s.C_CallDuration / 60;
+                                obj.Rental = temp_rent;
+
+                                print_Bill.Add(obj);
+
+                                s.C_CallDuration = a - s.C_CallDuration;
+                                s.C_CallStartTime = Convert.ToDateTime(startPeakTime.ToString());
+
+                                //continue;//break;
+                                goto ExitLable;
+                            }
+
+                        }
+
+                    }
+                }
+                else if (obj.Package_Code == "D")
+                {
+                    int temp_rent = 300;
+                    /* For Local Area Calls*/
+                    if (header == call_header_receved[0])
+                    {                        
+                        /*In Peak Time*/
+                        if (s.C_CallStartTime.Hour > startPeakTime.Hours && s.C_CallStartTime.Hour < stopPeakTime.Hours /*&& s.C_CallStartTime.AddMinutes(s.C_CallDuration / 60).Hour < stopPeakTime.Hours*/)
+                        {
+                            int PackD_Peak_Local_CallCarge = 3;
+                            if ((s.C_CallStartTime.Hour + s.C_CallDuration / 3600) <= stopPeakTime.Hours)
+                            {
+                                obj.CallNo = i;
+                                obj.CallStartTime = s.C_CallStartTime;
+                                obj.CallDuration = s.C_CallDuration;
+                                obj.Destination = s.C_EndPNumber;
+                                obj.Each_CallCarge = PackD_Peak_Local_CallCarge * s.C_CallDuration / 60;
+                                obj.Rental = temp_rent;
+
+                                print_Bill.Add(obj);
+                            }
+                            else if ((s.C_CallStartTime.Hour + s.C_CallDuration / 3600) > stopPeakTime.Hours)
+                            {
+                                obj.CallNo = i;
+                                obj.CallStartTime = s.C_CallStartTime;
+                                int a = s.C_CallDuration;
+                                s.C_CallDuration = (stopPeakTime.Hours - s.C_CallStartTime.Hour) * 3600;
+                                obj.CallDuration = s.C_CallDuration;
+                                obj.Destination = s.C_EndPNumber;
+                                obj.Each_CallCarge = PackD_Peak_Local_CallCarge * s.C_CallDuration / 60;
+                                obj.Rental = temp_rent;
+
+                                print_Bill.Add(obj);
+
+                                s.C_CallDuration = a - s.C_CallDuration;
+                                s.C_CallStartTime = Convert.ToDateTime(stopPeakTime.ToString());
+
+                                //continue;//break;
+                                goto ExitLable;
+                            }
+
+                        }
+                        /*In Off Peak Time and before to 24*/
+                        else if ((s.C_CallStartTime.Hour < stoptDayTime.Hours && s.C_CallStartTime.Hour >= stopPeakTime.Hours))
+                        {
+                            //Console.WriteLine("Call: " + i);
+                            int PackD_OffPeak_Local_CallCarge = 2;
+
+                            if ((s.C_CallStartTime.Hour + s.C_CallDuration / 3600) <= 24)
+                            {
+                                obj.CallNo = i;
+                                obj.CallStartTime = s.C_CallStartTime;
+                                obj.CallDuration = s.C_CallDuration;
+                                obj.Destination = s.C_EndPNumber;
+                                obj.Each_CallCarge = PackD_OffPeak_Local_CallCarge * s.C_CallDuration / 60;
+                                obj.Rental = temp_rent;
+
+                                print_Bill.Add(obj);
+                            }
+                            else if ((s.C_CallStartTime.Hour + s.C_CallDuration / 3600) > 24)
+                            {
+                                obj.CallNo = i;
+                                obj.CallStartTime = s.C_CallStartTime;
+                                int a = s.C_CallDuration;
+                                s.C_CallDuration = (24 - s.C_CallStartTime.Hour) * 3600;
+                                obj.CallDuration = s.C_CallDuration;
+                                obj.Destination = s.C_EndPNumber;
+                                obj.Each_CallCarge = PackD_OffPeak_Local_CallCarge * s.C_CallDuration / 60;
+                                obj.Rental = temp_rent;
+
+                                print_Bill.Add(obj);
+
+                                s.C_CallDuration = a - s.C_CallDuration;
+                                s.C_CallStartTime = Convert.ToDateTime(startDayTime.ToString());
+
+                                //continue;//break;
+                                goto ExitLable;
+                            }
+
+                        }
+                        /*In Off Peak Time and After to 24*/
+                        else if ((s.C_CallStartTime.Hour >= startDayTime.Hours && s.C_CallStartTime.Hour < startPeakTime.Hours))
+                        {
+                            //Console.WriteLine("Call: " + i);
+                            int PackD_OffPeak_Local_CallCarge = 2;
+
+                            if ((s.C_CallStartTime.Hour + s.C_CallDuration / 3600) <= startPeakTime.Hours)
+                            {
+                                obj.CallNo = i;
+                                obj.CallStartTime = s.C_CallStartTime;
+                                obj.CallDuration = s.C_CallDuration;
+                                obj.Destination = s.C_EndPNumber;
+                                obj.Each_CallCarge = PackD_OffPeak_Local_CallCarge * s.C_CallDuration / 60;
+                                obj.Rental = temp_rent;
+
+                                print_Bill.Add(obj);
+                            }
+                            else if ((s.C_CallStartTime.Hour + s.C_CallDuration / 3600) > startPeakTime.Hours)
+                            {
+                                obj.CallNo = i;
+                                obj.CallStartTime = s.C_CallStartTime;
+                                int a = s.C_CallDuration;
+                                s.C_CallDuration = (startPeakTime.Hours - s.C_CallStartTime.Hour) * 3600;
+                                obj.CallDuration = s.C_CallDuration;
+                                obj.Destination = s.C_EndPNumber;
+                                obj.Each_CallCarge = PackD_OffPeak_Local_CallCarge * s.C_CallDuration / 60;
+                                obj.Rental = temp_rent;
+
+                                print_Bill.Add(obj);
+
+                                s.C_CallDuration = a - s.C_CallDuration;
+                                s.C_CallStartTime = Convert.ToDateTime(startPeakTime.ToString());
+
+                                //continue;//break;
+                                goto ExitLable;
+                            }
+
+                        }
+
+                    }
+                    /* For Long Area Calls*/
+                    else if (header != call_header_receved[0])
+                    {      
+                        /*Start In Peak Time*/
+                        if (s.C_CallStartTime.Hour > startPeakTime.Hours && s.C_CallStartTime.Hour < stopPeakTime.Hours /*&& s.C_CallStartTime.AddMinutes(s.C_CallDuration / 60).Hour < stopPeakTime.Hours*/)
+                        {
+                            int PackD_Peak_Long_CallCarge = 5;
+                            if ((s.C_CallStartTime.Hour + s.C_CallDuration / 3600) <= stopPeakTime.Hours)
+                            {
+                                obj.CallNo = i;
+                                obj.CallStartTime = s.C_CallStartTime;
+                                obj.CallDuration = s.C_CallDuration;
+                                obj.Destination = s.C_EndPNumber;
+                                obj.Each_CallCarge = PackD_Peak_Long_CallCarge * s.C_CallDuration / 60;
+                                obj.Rental = temp_rent;
+
+                                print_Bill.Add(obj);
+                            }
+                            else if ((s.C_CallStartTime.Hour + s.C_CallDuration / 3600) > stopPeakTime.Hours)
+                            {
+                                obj.CallNo = i;
+                                obj.CallStartTime = s.C_CallStartTime;
+                                int a = s.C_CallDuration;
+                                s.C_CallDuration = (stopPeakTime.Hours - s.C_CallStartTime.Hour) * 3600;
+                                obj.CallDuration = s.C_CallDuration;
+                                obj.Destination = s.C_EndPNumber;
+                                obj.Each_CallCarge = PackD_Peak_Long_CallCarge * s.C_CallDuration / 60;
+                                obj.Rental = temp_rent;
+
+                                print_Bill.Add(obj);
+
+                                s.C_CallDuration = a - s.C_CallDuration;
+                                s.C_CallStartTime = Convert.ToDateTime(stopPeakTime.ToString());
+
+                                //continue;//break;
+                                goto ExitLable;
+                            }
+
+                        }
+                        /*In Off Peak Time and before to 24*/
+                        else if ((s.C_CallStartTime.Hour < stoptDayTime.Hours && s.C_CallStartTime.Minute < stoptDayTime.Minutes && s.C_CallStartTime.Hour >= stopPeakTime.Hours))
+                        {
+                            //Console.WriteLine("Call: " + i);
+                            int PackD_OffPeak_Long_CallCarge = 4;
+
+                            if ((s.C_CallStartTime.Hour + s.C_CallDuration / 3600) <= 24)
+                            {
+                                obj.CallNo = i;
+                                obj.CallStartTime = s.C_CallStartTime;
+                                obj.CallDuration = s.C_CallDuration;
+                                obj.Destination = s.C_EndPNumber;
+                                obj.Each_CallCarge = PackD_OffPeak_Long_CallCarge * s.C_CallDuration / 60;
+                                obj.Rental = temp_rent;
+
+                                print_Bill.Add(obj);
+                            }
+                            else if ((s.C_CallStartTime.Hour + s.C_CallDuration / 3600) > 24)
+                            {
+                                obj.CallNo = i;
+                                obj.CallStartTime = s.C_CallStartTime;
+                                int a = s.C_CallDuration;
+                                s.C_CallDuration = (24 - s.C_CallStartTime.Hour) * 3600;
+                                obj.CallDuration = s.C_CallDuration;
+                                obj.Destination = s.C_EndPNumber;
+                                obj.Each_CallCarge = PackD_OffPeak_Long_CallCarge * s.C_CallDuration / 60;
+                                obj.Rental = temp_rent;
+
+                                print_Bill.Add(obj);
+
+                                s.C_CallDuration = a - s.C_CallDuration;
+                                s.C_CallStartTime = Convert.ToDateTime(startDayTime.ToString());
+
+                                //continue;//break;
+                                goto ExitLable;
+                            }
+
+                        }
+                        /*In Off Peak Time and After to 24*/
+                        else if ((s.C_CallStartTime.Hour >= startDayTime.Hours && s.C_CallStartTime.Hour < startPeakTime.Hours))
+                        {
+                            //Console.WriteLine("Call: " + i);
+                            int PackD_OffPeak_Long_CallCarge = 4;
+
+                            if ((s.C_CallStartTime.Hour + s.C_CallDuration / 3600) <= startPeakTime.Hours)
+                            {
+                                obj.CallNo = i;
+                                obj.CallStartTime = s.C_CallStartTime;
+                                obj.CallDuration = s.C_CallDuration;
+                                obj.Destination = s.C_EndPNumber;
+                                obj.Each_CallCarge = PackD_OffPeak_Long_CallCarge * s.C_CallDuration / 60;
+                                obj.Rental = temp_rent;
+
+                                print_Bill.Add(obj);
+                            }
+                            else if ((s.C_CallStartTime.Hour + s.C_CallDuration / 3600) > startPeakTime.Hours)
+                            {
+                                obj.CallNo = i;
+                                obj.CallStartTime = s.C_CallStartTime;
+                                int a = s.C_CallDuration;
+                                s.C_CallDuration = (startPeakTime.Hours - s.C_CallStartTime.Hour) * 3600;
+                                obj.CallDuration = s.C_CallDuration;
+                                obj.Destination = s.C_EndPNumber;
+                                obj.Each_CallCarge = PackD_OffPeak_Long_CallCarge * s.C_CallDuration / 60;
+                                obj.Rental = temp_rent;
+
+                                print_Bill.Add(obj);
+
+                                s.C_CallDuration = a - s.C_CallDuration;
+                                s.C_CallStartTime = Convert.ToDateTime(startPeakTime.ToString());
+
+                                //continue;//break;
+                                goto ExitLable;
+                            }
+
+                        }
+
+                    }
+
+                }
+
+
                 i = i + 1;
                 ret_obj = obj;              
                 
@@ -659,14 +1169,18 @@ namespace Billing_System
         {
             int n = 0;
             double totalCallCharge = 0;
-            int rental = 100;
-            double tax_pre = 20 / 100;
+            //int rental = 100;
+            int rental = 0;            
             double tax = 0;
+            string package = "";
+            double discount = 0;
 
             foreach (CalculatedBill res in print_Bill)
             {
+                rental = res.Rental;
                 if (n == 0)
                 {
+                    //Console.WriteLine("Call No: " + res.CallNo);
                     Console.WriteLine("PhoneNumber: " + res.PNumber);
                     Console.WriteLine("BillingAdress: " + res.BillingAdress);
                     Console.WriteLine("totalCallCharge: " + totalCallCharge);
@@ -674,26 +1188,34 @@ namespace Billing_System
                     
                 }
                 
-                Console.WriteLine("-- -- -- --");
+                Console.WriteLine("-- -- -- -- -- -- --");
                 Console.WriteLine("Call: " + res.CallNo);
                 Console.WriteLine("StartTime: " + res.CallStartTime);
-                Console.WriteLine("CallDuration: "+ res.CallDuration);
+                Console.WriteLine("CallDuration: "+ res.CallDuration + "Sec");
                 Console.WriteLine("DestinationNumber: "+ res.Destination);
                 Console.WriteLine("This Call Charge: "+ res.Each_CallCarge);
 
                 totalCallCharge = totalCallCharge + res.Each_CallCarge;
-
+                package = res.Package_Code;
                 n = n + 1;
             }
+           
             Console.WriteLine("--------------------");
             Console.WriteLine("Totai Call Charges: " + totalCallCharge);
             tax = (totalCallCharge + rental) * 20/100;
-            Console.WriteLine("Tax: " +  tax);
-            Console.WriteLine("BillAmount: " + (totalCallCharge+tax+rental));
+            Console.WriteLine("Tax: " +  tax);            
+            
+            if (totalCallCharge > 1000 && (package=="A" || package == "B"))
+            {
+                discount = totalCallCharge * 40 / 100;
+            }
 
-            //CalculatedBill ret_val = new CalculatedBill();
-            //ret_val.Tax = tax;
-            double BillAmount = totalCallCharge + tax + rental;
+            double BillAmount = totalCallCharge + tax + rental - discount;
+            Console.WriteLine("--------------------");
+            Console.WriteLine("BillAmount: " + (totalCallCharge + tax + rental));
+            Console.WriteLine("--------------------");
+            Console.WriteLine(" ");
+
 
             return BillAmount;
         }

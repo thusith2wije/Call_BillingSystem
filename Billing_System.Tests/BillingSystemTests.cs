@@ -111,7 +111,7 @@ namespace Billing_System.Tests
             //Microsoft.VisualStudio.TestTools.UnitTesting.Assert.AreEqual(expected.BillAmount, ret_val.BillAmount);
         }
         [Test]//6
-        public void CheckGenarateFor_PeakTime_PackageA_Local_MoreCalls()
+        public void CheckGenarateFor_StartCallIn_PeakTime_PackageA_Local_MoreCalls()
         {
             /*Arrange*/
             CalculatedBill expected = new CalculatedBill();
@@ -129,7 +129,7 @@ namespace Billing_System.Tests
         }
 
         [Test]//7
-        public void CheckGenarateFor_PeakTime_PackageA_NotLocal_Calls()
+        public void CheckGenarateFor_StartCallIn_PeakTime_PackageA_NotLocal_Calls()
         {
             /*Arrange*/
             CalculatedBill expected = new CalculatedBill();
@@ -211,30 +211,44 @@ namespace Billing_System.Tests
             //Microsoft.VisualStudio.TestTools.UnitTesting.Assert.AreEqual(expected.BillAmount, ret_val.BillAmount);
         }
 
-        // [Test]//10
-        //public void CheckGenarateFor_Packages_Customers()
-        //{
-        //    /*Arrange*/
-        //    CalculatedBill expected = new CalculatedBill();
-        //    expected.PNumber = "011-7489261";
-        //    expected.BillingAdress = "Borella";
-        //    expected.Package_Code = "B";
-        //    //expected.TotalCallCharge = 4 * 60 / 60;
-        //    //expected.Tax = (expected.TotalCallCharge + 100) * 20 / 100;
-        //    //expected.Rental = 100;
-        //    //expected.BillAmount = expected.TotalCallCharge + expected.Tax + expected.Rental;
+        [Test]//11
+        public void CheckGenarateFor_StartCallIn_PeakTime_PackageC_Local_Calls()
+        {
+            /*Arrange*/
+            CalculatedBill expected = new CalculatedBill();
+            expected.PNumber = "011-7489266";
+            //expected.BillingAdress = "Dehiwala";
+            double totalCallCharge = (2 * (120-60) / 60);//4
+            double Tax = (totalCallCharge + 300) * 20 / 100;//60.8
+            expected.Rental = 300;
+            expected.BillAmount = totalCallCharge + Tax + expected.Rental;//364.8
 
-        //    /*Action*/
-        //    CalculatedBill ret_val = Genarate("011-7489261");
+            /*Action*/
+            CalculatedBill ret_val = Genarate("011-7489266");
 
-        //    /*Assert*/
-        //    Microsoft.VisualStudio.TestTools.UnitTesting.Assert.AreEqual(expected.PNumber, ret_val.PNumber);
-        //    Microsoft.VisualStudio.TestTools.UnitTesting.Assert.AreEqual(expected.Package_Code, ret_val.Package_Code);
-        //    //Microsoft.VisualStudio.TestTools.UnitTesting.Assert.AreEqual(expected.TotalCallCharge, ret_val.TotalCallCharge);
-        //    //Microsoft.VisualStudio.TestTools.UnitTesting.Assert.AreEqual(expected.Tax, ret_val.Tax);
-        //    //Microsoft.VisualStudio.TestTools.UnitTesting.Assert.AreEqual(expected.BillAmount, ret_val.BillAmount);
-        //}
+            /*Assert*/
+            Microsoft.VisualStudio.TestTools.UnitTesting.Assert.AreEqual(expected.PNumber, ret_val.PNumber);
+            Microsoft.VisualStudio.TestTools.UnitTesting.Assert.AreEqual(expected.BillAmount, ret_val.BillAmount);
+        }
 
+        [Test]//12
+        public void CheckGenarateFor_StartCallIn_PeakTime_PackageD_Local_Calls()
+        {
+            /*Arrange*/
+            CalculatedBill expected = new CalculatedBill();
+            expected.PNumber = "011-7489267";
+            double totalCallCharge = (3 * 120 / 60);//6
+            double Tax = (totalCallCharge + 300) * 20 / 100;//61.2
+            expected.Rental = 300;
+            expected.BillAmount = totalCallCharge + Tax + expected.Rental;//367.2
+
+            /*Action*/
+            CalculatedBill ret_val = Genarate("011-7489267");
+
+            /*Assert*/
+            Microsoft.VisualStudio.TestTools.UnitTesting.Assert.AreEqual(expected.PNumber, ret_val.PNumber);
+            Microsoft.VisualStudio.TestTools.UnitTesting.Assert.AreEqual(expected.BillAmount, ret_val.BillAmount);
+        }
 
 
     }

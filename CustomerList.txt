@@ -4,3 +4,5 @@
 011-7489263,Moratuwa,Aamal,B,14/1/2017
 011-7489264,Kelaniya,Bimal,B,15/1/2017
 011-7489265,Gampaha,Geemal,B,16/1/2017
+011-7489266,Gampola,Nuwan,C,17/1/2017
+011-7489267,Badulla,Ruwan,D,18/1/2017
